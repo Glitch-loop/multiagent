@@ -1,3 +1,0 @@
-[submodule "integradora2/traffic-server"]
-	path = integradora2/traffic-server
-	url = https://git.heroku.com/server-traffic.git
