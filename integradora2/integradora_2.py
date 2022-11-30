@@ -51,6 +51,7 @@ class CarAgent(ap.Agent):
         self.initialIdType = self.idType
         self.carChoseAWay = 0
         self.wayChosen = 0
+        self.activated = 1
 
 class StreetAgent(ap.Agent):
     def setup(self):
@@ -305,14 +306,16 @@ class MyModel(ap.Model):
                 # Move the car (towards and right option)
                 if carInFront == 0:   
                     self.area.move_by(car, self.move[car.idType])
+
             [y, x] = self.area.positions[car]
-            self.record(car.id, {'x': x, 'y': y} )
+            self.record(car.id, {'x': x, 'y': y, 'activated: ': car.activated} )
 
             # Verify if the car reached the destination coordinates 
             [currentY, currentX] = self.area.positions[car]
             [destinationY, destinationX] = self.finalPositionCoordinates[car.idType]
             if currentY == destinationY and destinationX == currentX:
                 car.agent_type = 1
+                car.activated = 0
 
         # If there's not an agent car of type 0 then we finish the simulation
         finishSimulation = 1
@@ -344,12 +347,21 @@ def principal():
 
     totalCars -= 4 # Substract 4 that are the 4 traffic light
     carsMovements["totalCars"] = totalCars
+    carsMovements["trafficLights"] = {}
+    carsMovements["cars"] = {}
 
+    trafficLights = 0
     for i in result.variables.MyModel:
-        carsMovements[i] = []
+        if trafficLights < 4:
+            carsMovements["trafficLights"][i] = []
+        else:
+            carsMovements["cars"][i] = []
         for movement in result.variables.MyModel[i]:
-            carsMovements[i].append(movement)
-    
+            if trafficLights < 4:
+                carsMovements["trafficLights"][i].append(movement)
+            else:
+                carsMovements["cars"][i].append(movement)
+        trafficLights += 1
     return str(carsMovements)
 
 # Run server command:
