@@ -28,11 +28,13 @@ from flask import Flask
 app = Flask(__name__)
 
 parameters = {
-    #Cantidad de carros
-    'K': 20, 
-    #Tamaño de ciudad
+    # Cantidad de carros
+    'K': 5, 
+    # Tamaño de ciudad
     'citySize': 60,
-    #Duración simulación
+    # Origen de spwan
+    'originSpawn': [],
+    # Duración simulación
     'steps': 300,
 }
 
@@ -45,13 +47,16 @@ class CarAgent(ap.Agent):
         2 = top
         3 = botton
         '''       
-        self.idType = random.randint(0, 3)
+        self.idType = 0
         # self.idType = random.choice([0,1])
-        # self.idType = 2
-        self.initialIdType = self.idType
+        self.initialIdType = 0
         self.carChoseAWay = 0
         self.wayChosen = 0
         self.activated = 1
+
+    def determinateType(self, arrSpawmn):
+        self.idType = random.choice(arrSpawmn)
+        self.initialIdType = self.idType
 
 class StreetAgent(ap.Agent):
     def setup(self):
@@ -186,7 +191,12 @@ class MyModel(ap.Model):
 
 
         # Add agents to the enviroment
-        #Cars
+        # Cars 
+        # Determinate type of car
+        for car in self.cars:
+            car.determinateType(self.p.originSpawn)
+
+        # Determinate positions
         positionCars = []
         for car in self.cars:
             positionCars.append(self.initialPositionCoordinates[car.idType])
@@ -308,7 +318,7 @@ class MyModel(ap.Model):
                     self.area.move_by(car, self.move[car.idType])
 
             [y, x] = self.area.positions[car]
-            self.record(car.id, {'x': x, 'y': y, 'activated: ': car.activated} )
+            self.record(car.id, {'x': x, 'y': y, 'activated': car.activated} )
 
             # Verify if the car reached the destination coordinates 
             [currentY, currentX] = self.area.positions[car]
@@ -326,15 +336,31 @@ class MyModel(ap.Model):
         if finishSimulation == 1:
             self.stop()
 
-
-# model = MyModel(parameters)
-# result = model.run()
-# print(result.variables.MyModel)
-# for i in result.variables.MyModel:
-#     print(i)
 #Server
-@app.route('/')
-def principal():
+@app.route('/<carAmount>&<originSpwan>')
+def principal(carAmount, originSpwan):
+    carAmount = int(carAmount)
+    originSpwan = json.loads(originSpwan)
+
+    if carAmount < 5:
+        carAmount = 5
+
+    parameters['K'] = carAmount
+    
+    parameters['originSpawn'] = []
+
+    for i in originSpwan:
+        if(i == 0 or i == 1 or i == 2 or i == 3):
+            append = 1
+            for repited in parameters['originSpawn']:
+                if i == repited:
+                    append = 0 
+            if append == 1:
+                parameters['originSpawn'].append(i)
+    
+    if parameters['originSpawn'] == []:
+        parameters['originSpawn'] = [0, 1, 2, 3]
+    
     model = MyModel(parameters)
     result = model.run()
 
