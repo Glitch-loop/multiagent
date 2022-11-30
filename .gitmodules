@@ -1,6 +1,0 @@
-[submodule "server-traffic"]
-	path = server-traffic
-	url = https://git.heroku.com/server-traffic.git
-[submodule "integradora2/server-traffic"]
-	path = integradora2/server-traffic
-	url = https://git.heroku.com/server-traffic.git
