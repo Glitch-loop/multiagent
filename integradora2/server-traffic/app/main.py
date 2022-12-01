@@ -52,6 +52,8 @@ class CarAgent(ap.Agent):
         self.carChoseAWay = 0
         self.wayChosen = 0
         self.activated = 1
+        self.timeToWait = 0
+
 
     def determinateType(self, arrSpawmn):
         self.idType = random.choice(arrSpawmn)
@@ -68,6 +70,7 @@ class TrafficLightAgent(ap.Agent):
         self.timeCounterWait = 0
         self.timeToStop = 10
         self.actualState = 0
+        self.timeToWait = 0
 
     def determinateTime(self):
         if self.idType == 2 or self.idType == 3:
@@ -259,16 +262,40 @@ class MyModel(ap.Model):
                 and car.carChoseAWay == 0):
                     if car.initialIdType == 0:
                         car.wayChosen = random.choice([0, 2, 3])
+                        if car.wayChosen == 0:
+                            car.timeToWait += 4
+                        if car.wayChosen == 2:
+                            car.timeToWait += 2
+                        if car.wayChosen == 3:
+                            car.timeToWait += 1
                         
                     if car.initialIdType == 1:
                         car.wayChosen = random.choice([1, 2, 3])
+                        if car.wayChosen == 1:
+                            car.timeToWait += 4
+                        if car.wayChosen == 3:
+                            car.timeToWait += 2
+                        if car.wayChosen == 2:
+                            car.timeToWait += 1
                         
                     if car.initialIdType == 2:
                         car.wayChosen = random.choice([0, 1, 2])
-                        
+                        if car.wayChosen == 2:
+                            car.timeToWait += 4
+                        if car.wayChosen == 1:
+                            car.timeToWait += 2
+                        if car.wayChosen == 0:
+                            car.timeToWait += 1
+
                     if car.initialIdType == 3:
                         car.wayChosen = random.choice([0, 1, 3])
-                        
+                        if car.wayChosen == 3:
+                            car.timeToWait += 4
+                        if car.wayChosen == 0:
+                            car.timeToWait += 2
+                        if car.wayChosen == 1:
+                            car.timeToWait += 1
+                     
                     car.carChoseAWay = 1 # This attribute helps us prevent the car from choose a way again
 
             # Check if it is necessary for the agent to stop
@@ -299,28 +326,36 @@ class MyModel(ap.Model):
                         
                         # Check left movement (special if the agent can do a diagonal movement)
                         [movY, movX] = self.move[car.idType + 4] # Get the rate value of the movement
+
                         if (movY == posY and movX == posX):
                             # Agent can't do a diagonal movememnt becasue there is another agent
                             diagonalMovement = 0 
-                        # else:
-                        #     # Agent can do a diagonal movement because there isn't an agent 
-                        #     diagonalMovement = 1
-
+                    
+                    
                 # In case that the car is in the center and has a decision to go to the left
                 if yCoor == yCar and xCoor == xCar and self.leftSides[car.initialIdType] == car.wayChosen:
-                    [movY, movX] = self.move[car.idType + 4]
                     if diagonalMovement == 1: # Diagonal movement
                         self.area.move_by(car, self.move[car.idType + 4])                        
+                        car.idType = car.wayChosen # Change direction
                     else: # "L" movement
-                        # Check if there is an agent in front of our current car
+                        # Check if there is an agent in front of our current car, if it is then wait the time acomulated + 1  
                         if carInFront == 0:
-                            self.area.move_by(car, self.move[car.idType])
-                    car.idType = car.wayChosen # Change direction
+                            if car.timeToWait == 0:
+                                self.area.move_by(car, self.move[car.idType])
+                                car.idType = car.wayChosen # Change direction
+                            else:
+                                car.timeToWait -= 1     
+                        else:
+                            car.timeToWait += 1
                     carInFront = 1 
                     
                 # Move the car (towards and right option)
                 if carInFront == 0:   
-                    self.area.move_by(car, self.move[car.idType])
+                    #If the car doens't have time to wait then moves to it direction
+                    if car.timeToWait == 0:
+                        self.area.move_by(car, self.move[car.idType])
+                    else:
+                        car.timeToWait -= 1     
 
             [y, x] = self.area.positions[car]
             self.record(car.id, {'x': x, 'y': y, 'activated': car.activated} )
