@@ -288,29 +288,35 @@ class MyModel(ap.Model):
                     # Verify if there's a neighbor car
                     if neighbor.agent_type == 0:   
                         [yNeighbor, xNeighbor] = self.area.positions[neighbor]
+                        # Calculate "value movement" of the car
                         posY = yNeighbor - yCar
                         posX = xNeighbor - xCar 
                         [movY, movX] = self.move[car.idType] # Get value movement
                         
                         # Check forward movement
-                        if (posY == movY and movX == posX):
+                        if (movY == posY and movX == posX):
                             carInFront = 1
                         
                         # Check left movement (special if the agent can do a diagonal movement)
                         [movY, movX] = self.move[car.idType + 4] # Get the rate value of the movement
-                        if (posY == movY and movX == posX):
-                            diagonalMovement = 0
+                        if (movY == posY and movX == posX):
+                            # Agent can't do a diagonal movememnt becasue there is another agent
+                            diagonalMovement = 0 
                         else:
+                            # Agent can do a diagonal movement because there isn't an agent 
                             diagonalMovement = 1
-                    
+
                 # In case that the car is in the center and has a decision to go to the left
                 if yCoor == yCar and xCoor == xCar and self.leftSides[car.initialIdType] == car.wayChosen:
+                    [movY, movX] = self.move[car.idType + 4]
                     if diagonalMovement == 1: # Diagonal movement
                         self.area.move_by(car, self.move[car.idType + 4])                        
                     else: # "L" movement
-                        self.area.move_by(car, self.move[car.idType])
+                        # Check if there is an agent in front of our current car
+                        if carInFront == 0:
+                            self.area.move_by(car, self.move[car.idType])
                     car.idType = car.wayChosen # Change direction
-                    carInFront = 1
+                    carInFront = 1 
                     
                 # Move the car (towards and right option)
                 if carInFront == 0:   
@@ -325,7 +331,7 @@ class MyModel(ap.Model):
             if currentY == destinationY and destinationX == currentX:
                 car.agent_type = 1
                 car.activated = 0
-
+ 
         # If there's not an agent car of type 0 then we finish the simulation
         finishSimulation = 1
         for car in self.cars: 
@@ -334,7 +340,7 @@ class MyModel(ap.Model):
                 break
         if finishSimulation == 1:
             self.stop()
-
+            
 #Server
 '''
 If an empty array is passed, an array with all the options is automatically passed.
