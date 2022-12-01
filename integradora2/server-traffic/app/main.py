@@ -302,9 +302,9 @@ class MyModel(ap.Model):
                         if (movY == posY and movX == posX):
                             # Agent can't do a diagonal movememnt becasue there is another agent
                             diagonalMovement = 0 
-                        else:
-                            # Agent can do a diagonal movement because there isn't an agent 
-                            diagonalMovement = 1
+                        # else:
+                        #     # Agent can do a diagonal movement because there isn't an agent 
+                        #     diagonalMovement = 1
 
                 # In case that the car is in the center and has a decision to go to the left
                 if yCoor == yCar and xCoor == xCar and self.leftSides[car.initialIdType] == car.wayChosen:
@@ -340,7 +340,7 @@ class MyModel(ap.Model):
                 break
         if finishSimulation == 1:
             self.stop()
-            
+
 #Server
 '''
 If an empty array is passed, an array with all the options is automatically passed.
@@ -403,4 +403,4 @@ def principal(carAmount, originSpwan):
 
 # Run server command:
 # If you want to run the server locally go to the level of the dir "server" and execute the comand below: 
-# flask --app integradora_2.py run
+# flask --app main.py run
