@@ -30,3 +30,7 @@ It is common used in *social sciences* where a multiple scenarios which are comp
 The project deals with simulating an intersection in which each lane has its traffic light, upon reaching the center and if the traffic light is green, each agent will make the decision to go straight, turn right or turn left. , taking care not to collide with any car (in this case the agent must stop to wait until the road is clear to move forward).
 The main project is in *"integradora2"* file.
 We used heroku to deploy it, the engine that we use to run de flask server in heroku was `gunicorn`
+
+The library that allows us to simulate the intereccion was `agentpy`
+
+If you want to visualize the result of the simulation then (for ease) you must to run it in `jupyter notebook` project and you will use `matplot` for render the graphs
